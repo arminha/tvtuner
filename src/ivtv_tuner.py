@@ -4,6 +4,10 @@ __date__ ="$Mar 15, 2010 8:54:12 PM$"
 import re
 import subprocess
 
+# TODO audio mode
+# get audio mode: v4l2-ctl -d 1 -T
+# set audio mode: v4l2-ctl -d 1 -t lang1 ...
+
 class Tuner(object):
     """
     Documentation
@@ -48,4 +52,4 @@ class Tuner(object):
                 self.__channels.append((m.group(1), float(m.group(2))))
             line = f.readline()
         if self.__channels:
-            set_channel(self.__current_channel)
+            self.set_channel(0)
