@@ -17,32 +17,37 @@ def show_tv():
          '--deinterlace-mode=blend',
          'pvr:///dev/video1'])
 
-def handle_code(tuner, code):
+def handle_code(tuner, code, status):
     print "Command: %s, Repeat: %d" % (code["config"], code["repeat"])
     config = code["config"]
     if config.isdigit():
-        channel = int(config) - 1
-        tuner.set_channel(channel)
-    elif(config == "ChanUp"):
+        if status is None:
+            return int(config)
+        else:
+            channel = status * 10 + int(config) - 1
+            tuner.set_channel(channel)
+    elif config == "ChanUp":
         tuner.next_channel()
-    elif(config == "ChanDown"):
+    elif config == "ChanDown":
         tuner.prev_channel()
-    elif(config == "show-tv"):
+    elif config == "show-tv":
         show_tv()
+    elif config == "enter" and not status is None:
+        channel = status - 1
+        tuner.set_channel(channel)
+    return None
 
 def lirc_remote(tuner):
     pass
-    blocking = True;
+    blocking = False;
+
+    status = None
 
     if(pylirc.init("tvtuner", "~/.lircrc", blocking)):
         code = {"config" : ""}
         while(code["config"] != "quit"):
-            # Very intuitive indeed
-            if(not blocking):
-                print "."
-
-                # Delay...
-                time.sleep(1)
+            # Delay...
+            time.sleep(0.2)
 
             # Read next code
             s = pylirc.nextcode(1)
@@ -50,16 +55,12 @@ def lirc_remote(tuner):
             # Loop as long as there are more on the queue
             # (dont want to wait a second if the user pressed many buttons...)
             while(s):
-
                 # Print all the configs...
                 for (code) in s:
-                    handle_code(tuner, code)
+                    status = handle_code(tuner, code, status)
 
                 # Read next code?
-                if(not blocking):
-                    s = pylirc.nextcode(1)
-                else:
-                    s = []
+                s = pylirc.nextcode(1)
 
         # Clean up lirc
         pylirc.exit()
