@@ -38,16 +38,24 @@ def handle_code(tuner, code, status):
     return None
 
 def lirc_remote(tuner):
-    pass
     blocking = False;
 
     status = None
 
     if(pylirc.init("tvtuner", "~/.lircrc", blocking)):
         code = {"config" : ""}
+        count = 0
         while(code["config"] != "quit"):
             # Delay...
             time.sleep(1)
+            if status:
+                count += 1
+            else:
+                count = 0
+            if count > 3:
+                tuner.set_channel(status)
+                status = None
+                count = 0
 
             # Read next code
             s = pylirc.nextcode(1)
