@@ -47,13 +47,13 @@ def lirc_remote(tuner):
         count = 0
         while(code["config"] != "quit"):
             # Delay...
-            time.sleep(1)
+            time.sleep(0.5)
             if status:
                 count += 1
             else:
                 count = 0
-            if count > 3:
-                tuner.set_channel(status)
+            if count > 4:
+                tuner.set_channel(status-1)
                 status = None
                 count = 0
 
