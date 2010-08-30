@@ -7,7 +7,11 @@ import pylirc
 import subprocess
 import time
 
+import logging
+
 import ivtv_tuner
+
+logging.basicConfig(level=logging.DEBUG)
 
 def show_tv():
     tv_process = subprocess.Popen(
@@ -18,7 +22,7 @@ def show_tv():
          'pvr:///dev/video1'])
 
 def handle_code(tuner, code, status):
-    print "Command: %s, Repeat: %d" % (code["config"], code["repeat"])
+    logging.debug("Command: %s, Repeat: %d" % (code["config"], code["repeat"]))
     config = code["config"]
     if config.isdigit():
         if status is None:

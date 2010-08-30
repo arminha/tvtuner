@@ -4,9 +4,25 @@ __date__ ="$Mar 15, 2010 8:54:12 PM$"
 import re
 import subprocess
 
+import logging
+
 # TODO audio mode
 # get audio mode: v4l2-ctl -d 1 -T
 # set audio mode: v4l2-ctl -d 1 -t lang1 ...
+
+# reimplement subprocess.check_output from python 2.7
+def check_output(*popenargs, **kwargs):
+    if 'stdout' in kwargs:
+        raise ValueError('stdout argument not allowed, it will be overridden.')
+    process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+    output, unused_err = process.communicate()
+    retcode = process.poll()
+    if retcode:
+        cmd = kwargs.get("args")
+        if cmd is None:
+            cmd = popenargs[0]
+        raise subprocess.CalledProcessError(retcode, cmd, output=output)
+    return output
 
 class Tuner(object):
     """
@@ -27,7 +43,11 @@ class Tuner(object):
 
     def set_channel(self, channel):
         (_,frequency) = self.__channels[channel]
-        subprocess.check_call(['ivtv-tune', '-d', self.__device, '-f', frequency.__str__()])
+        command = ['ivtv-tune', '-d', self.__device, '-f', frequency.__str__()]
+        output = check_output(
+            command,
+            stderr=subprocess.STDOUT)
+        logging.debug('call "%s", output = "%s"' % (' '.join(command), output))
         self.__current_channel = channel
 
     def next_channel(self):
