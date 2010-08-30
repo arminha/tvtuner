@@ -47,7 +47,7 @@ def lirc_remote(tuner):
         code = {"config" : ""}
         while(code["config"] != "quit"):
             # Delay...
-            time.sleep(0.2)
+            time.sleep(1)
 
             # Read next code
             s = pylirc.nextcode(1)
