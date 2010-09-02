@@ -73,6 +73,32 @@ TRANSPARENCY_NONE = c_TRANSPARENCY_NONE
 TRANSPARENCY_FAKE = c_TRANSPARENCY_FAKE
 TRANSPARENCY_COMPOSITE = c_TRANSPARENCY_COMPOSITE
 
+cdef extern from "aosd-text.h":
+    struct PangoLayout:
+        pass
+
+    struct PangoAttribute:
+        pass
+
+    PangoLayout* pango_layout_new_aosd()
+    void pango_layout_unref_aosd(PangoLayout* lay)
+
+    void pango_layout_get_size_aosd(PangoLayout* lay,
+        unsigned* width, unsigned* height, int* lbearing)
+
+    # Converts all \n occurrences into U+2028 symbol
+    void pango_layout_set_text_aosd(PangoLayout* lay, char* text)
+    void pango_layout_set_attr_aosd(PangoLayout* lay, PangoAttribute* attr)
+    void pango_layout_set_font_aosd(PangoLayout* lay, char* font_desc)
+
+    struct TextRenderData:
+        pass
+
+    void aosd_text_renderer(cairo_t* cr, void* TextRenderData_ptr)
+    void aosd_text_get_size(TextRenderData* trd, unsigned* width, unsigned* height)
+    int aosd_text_get_screen_wrap_width(c_Aosd* aosd, TextRenderData* trd)
+
+
 cdef class Aosd:
     cdef c_Aosd * _aosd
 
