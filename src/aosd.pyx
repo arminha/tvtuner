@@ -55,6 +55,9 @@ cdef extern from "aosd.h":
     #void aosd_set_mouse_event_cb(c_Aosd* aosd, AosdMouseEventCb cb, void* user_data)
     void aosd_set_hide_upon_mouse_event(c_Aosd* aosd, Bool enable)
 
+COORDINATE_MINIMUM = c_COORDINATE_MINIMUM
+COORDINATE_CENTER = c_COORDINATE_CENTER
+COORDINATE_MAXIMUM = c_COORDINATE_MAXIMUM
 
 TRANSPARENCY_NONE = c_TRANSPARENCY_NONE
 TRANSPARENCY_FAKE = c_TRANSPARENCY_FAKE
