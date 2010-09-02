@@ -1,4 +1,8 @@
 
+#########################################
+# Extern C definitions
+#########################################
+
 cdef extern from "aosd.h":
     ctypedef int Bool
 
@@ -65,13 +69,19 @@ cdef extern from "aosd.h":
     void aosd_set_mouse_event_cb(c_Aosd* aosd, AosdMouseEventCb cb, void* user_data)
     void aosd_set_hide_upon_mouse_event(c_Aosd* aosd, Bool enable)
 
-COORDINATE_MINIMUM = c_COORDINATE_MINIMUM
-COORDINATE_CENTER = c_COORDINATE_CENTER
-COORDINATE_MAXIMUM = c_COORDINATE_MAXIMUM
+    # object manipulators
+    void aosd_render(c_Aosd* aosd)
+    void aosd_show(c_Aosd* aosd)
+    void aosd_hide(c_Aosd* aosd)
 
-TRANSPARENCY_NONE = c_TRANSPARENCY_NONE
-TRANSPARENCY_FAKE = c_TRANSPARENCY_FAKE
-TRANSPARENCY_COMPOSITE = c_TRANSPARENCY_COMPOSITE
+    # X main loop processing
+    void aosd_loop_once(c_Aosd* aosd)
+    void aosd_loop_for(c_Aosd* aosd, unsigned loop_ms)
+
+    # automatic object manipulator
+    void aosd_flash(c_Aosd* aosd, unsigned fade_in_ms,
+        unsigned full_ms, unsigned fade_out_ms)
+
 
 cdef extern from "aosd-text.h":
     struct PangoLayout:
@@ -99,6 +109,19 @@ cdef extern from "aosd-text.h":
     int aosd_text_get_screen_wrap_width(c_Aosd* aosd, TextRenderData* trd)
 
 
+#########################################
+# Python definitions
+#########################################
+
+COORDINATE_MINIMUM = c_COORDINATE_MINIMUM
+COORDINATE_CENTER = c_COORDINATE_CENTER
+COORDINATE_MAXIMUM = c_COORDINATE_MAXIMUM
+
+TRANSPARENCY_NONE = c_TRANSPARENCY_NONE
+TRANSPARENCY_FAKE = c_TRANSPARENCY_FAKE
+TRANSPARENCY_COMPOSITE = c_TRANSPARENCY_COMPOSITE
+
+
 cdef class Aosd:
     cdef c_Aosd * _aosd
 
@@ -110,4 +133,19 @@ cdef class Aosd:
 
     def set_transparency(self, int mode):
         aosd_set_transparency(self._aosd, <c_AosdTransparency>mode)
+
+    def get_transparency(self):
+        return aosd_get_transparency(self._aosd)
+
+    def is_shown(self):
+        return aosd_get_is_shown(self._aosd)
+
+    def show(self):
+        aosd_show(self._aosd)
+
+    def hide(self):
+        aosd_hide(self._aosd)
+
+    def render(self):
+        aosd_render(self._aosd)
 
