@@ -5,12 +5,13 @@ AOSDINCLUDE = \
     -I/usr/include/libaosd
 AOSDLIBS = \
     -laosd
+PANGOCAIRO_CFLAGS = `pkg-config --cflags --libs pangocairo`
 
 %.c:	%.pyx
 	pyrexc $<
 
 %.o:	%.c
-	gcc -c -fPIC $(PYINCLUDE) $(AOSDINCLUDE) $<
+	gcc -c -fPIC $(PYINCLUDE) $(AOSDINCLUDE) $(PANGOCAIRO_CFLAGS) $<
 
 %.so:	%.o
 	gcc -shared $< -lm $(AOSDLIBS) -o $@
