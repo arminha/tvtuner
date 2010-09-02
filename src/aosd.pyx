@@ -137,6 +137,12 @@ cdef class Aosd:
     def get_transparency(self):
         return aosd_get_transparency(self._aosd)
 
+    def get_screen_size(self):
+        cdef int width
+        cdef int height
+        aosd_get_screen_size(self._aosd, &width, &height)
+        return (width, height)
+
     def is_shown(self):
         return aosd_get_is_shown(self._aosd)
 
