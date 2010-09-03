@@ -131,17 +131,38 @@ cdef class Aosd:
     def __dealloc__(self):
         aosd_destroy(self._aosd)
 
-    def set_transparency(self, int mode):
-        aosd_set_transparency(self._aosd, <c_AosdTransparency>mode)
-
     def get_transparency(self):
         return aosd_get_transparency(self._aosd)
 
+    def set_transparency(self, int mode):
+        aosd_set_transparency(self._aosd, <c_AosdTransparency>mode)
+
     def get_screen_size(self):
-        cdef int width
-        cdef int height
+        cdef int width, height
         aosd_get_screen_size(self._aosd, &width, &height)
         return (width, height)
+
+    def get_geometry(self):
+        cdef int x, y, width, height
+        aosd_get_geometry(self._aosd, &x, &y, &width, &height)
+        return (x, y, width, height)
+
+    def set_geometry(self, int x, int y, int width, int height):
+        aosd_set_geometry(self._aosd, x, y, width, height)
+
+    def set_position(self, unsigned pos, int width, int height):
+        aosd_set_position(self._aosd, pos, width, height)
+
+    def set_position_offset(self, int x_offset, int y_offset):
+        aosd_set_position_offset(self._aosd, x_offset, y_offset)
+
+    def set_position_with_offset(self, int abscissa, int ordinate, int width, int height,
+        int x_offset, int y_offset):
+        aosd_set_position_with_offset(self._aosd, <c_AosdCoordinate> abscissa, <c_AosdCoordinate> ordinate,
+            width, height, x_offset, y_offset)
+
+    def set_hide_upon_mouse_event(self, Bool enable):
+        aosd_set_hide_upon_mouse_event(self._aosd, enable)
 
     def is_shown(self):
         return aosd_get_is_shown(self._aosd)
@@ -154,4 +175,13 @@ cdef class Aosd:
 
     def render(self):
         aosd_render(self._aosd)
+
+    def loop_once(self):
+        aosd_loop_once(self._aosd)
+
+    def loop_for(self, unsigned loop_ms):
+        aosd_loop_for(self._aosd, loop_ms)
+
+    def flash(self, unsigned fade_in_ms, unsigned full_ms, unsigned fade_out_ms):
+        aosd_flash(self._aosd, fade_in_ms, full_ms, fade_out_ms)
 
