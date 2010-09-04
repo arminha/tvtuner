@@ -12,7 +12,7 @@ cdef extern from "aosd.h":
     struct XClassHint:
         pass
 
-    struct c_Aosd "Aosd":
+    ctypedef struct c_Aosd "Aosd":
         pass
 
     struct AosdMouseEvent:
@@ -84,6 +84,11 @@ cdef extern from "aosd.h":
 
 
 cdef extern from "aosd-text.h":
+    ctypedef unsigned char guint8
+    ctypedef signed char gint8
+
+    void g_type_init()
+
     struct PangoLayout:
         pass
 
@@ -101,12 +106,38 @@ cdef extern from "aosd-text.h":
     void pango_layout_set_attr_aosd(PangoLayout* lay, PangoAttribute* attr)
     void pango_layout_set_font_aosd(PangoLayout* lay, char* font_desc)
 
-    struct TextRenderData:
-        pass
+
+    struct _geom:
+        guint8 x_offset
+        guint8 y_offset
+
+    struct _back:
+        char* color
+        guint8 opacity
+
+    struct _shadow:
+        char* color
+        guint8 opacity
+        gint8 x_offset
+        gint8 y_offset
+
+    struct _fore:
+        char* color
+        guint8 opacity
+
+    ctypedef struct TextRenderData:
+        PangoLayout* lay
+        int lbearing
+        _geom geom
+        _back back
+        _shadow shadow
+        _fore fore
 
     void aosd_text_renderer(cairo_t* cr, void* TextRenderData_ptr)
     void aosd_text_get_size(TextRenderData* trd, unsigned* width, unsigned* height)
     int aosd_text_get_screen_wrap_width(c_Aosd* aosd, TextRenderData* trd)
+
+    void pango_layout_set_text(PangoLayout *layout, char *text, int length)
 
 
 #########################################
@@ -184,4 +215,134 @@ cdef class Aosd:
 
     def flash(self, unsigned fade_in_ms, unsigned full_ms, unsigned fade_out_ms):
         aosd_flash(self._aosd, fade_in_ms, full_ms, fade_out_ms)
+
+def __convert_text(text):
+    if isinstance(text, unicode): # most common case first
+        utf8_data = text.encode('UTF-8')
+    elif isinstance(text, str):
+        text.decode('ASCII') # trial decoding, or however you want to check for plain ASCII data
+        utf8_data = text
+    else:
+        raise ValueError("requires text input, got %s" % type(text))
+    return utf8_data
+
+cdef class AosdText(Aosd):
+    cdef TextRenderData _rend
+    cdef object _text
+    cdef object _font_desc
+    cdef object _back_color
+    cdef object _fore_color
+    cdef object _shadow_color
+
+    def __cinit__(self):
+        g_type_init()
+        self._rend.lay = pango_layout_new_aosd()
+        aosd_set_renderer(self._aosd, aosd_text_renderer, &self._rend)
+
+    def __dealloc__(self):
+        pango_layout_unref_aosd(self._rend.lay)
+
+    def set_text(self, text):
+        self._text = __convert_text(text)
+        pango_layout_set_text(self._rend.lay, self._text, -1)
+
+    def get_text_size(self):
+        cdef unsigned int width, height
+        aosd_text_get_size(&self._rend, &width, &height)
+        return (width, height)
+
+    def set_font(self, font_desc):
+        self._font_desc = __convert_text(font_desc)
+        pango_layout_set_font_aosd(self._rend.lay, self._font_desc)
+
+    property back_color:
+        def __get__(self):
+            if self._rend.back.color == NULL:
+                return None
+            return self._rend.back.color
+
+        def __set__(self, value):
+            if value is None:
+                self._back_color = None
+                self._rend.back.color = NULL
+            else:
+                self._back_color = __convert_text(value)
+                self._rend.back.color = self._back_color
+
+    property back_opacity:
+        def __get__(self):
+            return self._rend.back.opacity
+
+        def __set__(self, value):
+            self._rend.back.opacity = value
+
+    property fore_color:
+        def __get__(self):
+            if self._rend.fore.color == NULL:
+                return None
+            return self._rend.fore.color
+
+        def __set__(self, value):
+            if value is None:
+                self._fore_color = None
+                self._rend.fore.color = NULL
+            else:
+                self._fore_color = __convert_text(value)
+                self._rend.fore.color = self._fore_color
+
+    property fore_opacity:
+        def __get__(self):
+            return self._rend.fore.opacity
+
+        def __set__(self, value):
+            self._rend.fore.opacity = value
+
+    property shadow_color:
+        def __get__(self):
+            if self._rend.shadow.color == NULL:
+                return None
+            return self._rend.shadow.color
+
+        def __set__(self, value):
+            if value is None:
+                self._shadow_color = None
+                self._rend.shadow.color = NULL
+            else:
+                self._shadow_color = __convert_text(value)
+                self._rend.shadow.color = self._shadow_color
+
+    property shadow_opacity:
+        def __get__(self):
+            return self._rend.shadow.opacity
+
+        def __set__(self, value):
+            self._rend.shadow.opacity = value
+
+    property shadow_x_offset:
+        def __get__(self):
+            return self._rend.shadow.x_offset
+
+        def __set__(self, value):
+            self._rend.shadow.x_offset = value
+
+    property shadow_y_offset:
+        def __get__(self):
+            return self._rend.shadow.y_offset
+
+        def __set__(self, value):
+            self._rend.shadow.y_offset = value
+
+    property geom_x_offset:
+        def __get__(self):
+            return self._rend.geom.x_offset
+
+        def __set__(self, value):
+            self._rend.geom.x_offset = value
+
+    property geom_y_offset:
+        def __get__(self):
+            return self._rend.geom.y_offset
+
+        def __set__(self, value):
+            self._rend.geom.y_offset = value
 
