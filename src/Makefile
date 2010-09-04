@@ -4,7 +4,7 @@ PYINCLUDE = \
 AOSDINCLUDE = \
     -I/usr/include/libaosd
 AOSDLIBS = \
-    -laosd
+    -laosd -laosd-text
 PANGOCAIRO_CFLAGS = `pkg-config --cflags --libs pangocairo`
 
 %.c:	%.pyx
