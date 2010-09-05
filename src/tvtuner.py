@@ -93,9 +93,13 @@ def handle_code(tuner, osd, code, status):
             channel = status * 10 + int(config)
             osd_count = set_channel(tuner, osd, channel)
     elif config == "ChanUp":
-        tuner.next_channel()
+        channel = tuner.next_channel()
+        osd.show(str(channel + 1))
+        osd_count = 4
     elif config == "ChanDown":
-        tuner.prev_channel()
+        channel = tuner.prev_channel()
+        osd.show(str(channel + 1))
+        osd_count = 4
     elif config == "show-tv":
         show_tv()
     elif config == "enter" and not status is None:

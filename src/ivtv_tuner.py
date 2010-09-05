@@ -55,12 +55,14 @@ class Tuner(object):
         if channel == len(self.__channels):
             channel = 0
         self.set_channel(channel)
+        return channel
 
     def prev_channel(self):
         channel = self.__current_channel - 1
         if channel == -1:
             channel = len(self.__channels) - 1
         self.set_channel(channel)
+        return channel
 
     def init_channels(self, filename):
         f = open(filename)
