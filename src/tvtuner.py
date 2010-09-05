@@ -12,6 +12,7 @@ import multiprocessing
 import logging
 
 import ivtv_tuner
+from osd import Osd
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -78,15 +79,19 @@ def show_tv():
          '--deinterlace-mode=blend',
          'pvr:///dev/video1'])
 
-def handle_code(tuner, code, status):
+def handle_code(tuner, osd, code, status):
     logging.debug("Command: %s, Repeat: %d" % (code["config"], code["repeat"]))
     config = code["config"]
+    osd_count = 0
     if config.isdigit():
         if status is None:
-            return int(config)
+            channel = int(config)
+            osd.show('%d-' % channel)
+            osd_count = 5
+            return (channel, osd_count)
         else:
-            channel = status * 10 + int(config) - 1
-            tuner.set_channel(channel)
+            channel = status * 10 + int(config)
+            osd_count = set_channel(tuner, osd, channel)
     elif config == "ChanUp":
         tuner.next_channel()
     elif config == "ChanDown":
@@ -94,14 +99,20 @@ def handle_code(tuner, code, status):
     elif config == "show-tv":
         show_tv()
     elif config == "enter" and not status is None:
-        channel = status - 1
-        tuner.set_channel(channel)
-    return None
+        channel = status
+        osd_count = set_channel(tuner, osd, channel)
+    return (None, osd_count)
 
-def lirc_remote(tuner):
+def set_channel(tuner, osd, channel):
+    tuner.set_channel(channel-1)
+    osd.show(str(channel))
+    return 4
+
+def lirc_remote(tuner, osd):
     blocking = False;
 
     status = None
+    osd_count = 0
 
     if(pylirc.init("tvtuner", "~/.lircrc", blocking)):
         code = {"config" : ""}
@@ -114,9 +125,14 @@ def lirc_remote(tuner):
             else:
                 count = 0
             if count > 4:
-                tuner.set_channel(status-1)
+                osd_count = set_channel(tuner, osd, status)
                 status = None
                 count = 0
+
+            if osd_count > 0:
+                osd_count -= 1
+                if osd_count == 0:
+                    osd.hide()
 
             # Read next code
             s = pylirc.nextcode(1)
@@ -126,7 +142,7 @@ def lirc_remote(tuner):
             while(s):
                 # Print all the configs...
                 for (code) in s:
-                    status = handle_code(tuner, code, status)
+                    (status, osd_count) = handle_code(tuner, osd, code, status)
 
                 # Read next code?
                 s = pylirc.nextcode(1)
@@ -138,4 +154,5 @@ if __name__ == "__main__":
     device = '/dev/video1'
     tuner = ivtv_tuner.Tuner(device)
     tuner.init_channels('/home/armin/.tv-viewer/config/stations_europe-west.conf')
-    lirc_remote(tuner)
+    osd = Osd()
+    lirc_remote(tuner, osd)
