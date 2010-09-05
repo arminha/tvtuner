@@ -159,4 +159,9 @@ if __name__ == "__main__":
     tuner = ivtv_tuner.Tuner(device)
     tuner.init_channels('/home/armin/.tv-viewer/config/stations_europe-west.conf')
     osd = Osd()
-    lirc_remote(tuner, osd)
+    try:
+        lirc_remote(tuner, osd)
+    except KeyboardInterrupt:
+        osd.hide()
+        del osd
+        logging.debug('Exiting..')
