@@ -8,7 +8,7 @@ AOSDLIBS = \
 PANGOCAIRO_CFLAGS = `pkg-config --cflags --libs pangocairo`
 
 %.c:	%.pyx
-	pyrexc $<
+	cython $<
 
 %.o:	%.c
 	gcc -c -fPIC $(PYINCLUDE) $(AOSDINCLUDE) $(PANGOCAIRO_CFLAGS) $<
