@@ -47,6 +47,7 @@ setup (
             libraries = ['aosd', 'aosd-text']
         )
     ],
+    scripts = ['src/tvtuner'],
 
     # Declare your packages' dependencies here, for eg:
     requires=['pylirc', 'multiprocessing', 'logging'],

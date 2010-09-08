@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 __author__="armin.aha@gmail.com"
 __date__ ="$Mar 15, 2010 8:45:58 PM$"
 
@@ -154,7 +152,7 @@ def lirc_remote(tuner, osd):
         # Clean up lirc
         pylirc.exit()
 
-if __name__ == "__main__":
+def run():
     device = '/dev/video1'
     tuner = ivtv_tuner.Tuner(device)
     tuner.init_channels('/home/armin/.tv-viewer/config/stations_europe-west.conf')
