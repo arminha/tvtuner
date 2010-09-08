@@ -1,0 +1,5 @@
+setup.py
+src/aosd.pyx
+src/ivtv_tuner.py
+src/osd.py
+src/tvtuner.py
