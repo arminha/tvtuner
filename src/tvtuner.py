@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __author__="armin.aha@gmail.com"
 __date__ ="$Mar 15, 2010 8:45:58 PM$"
