@@ -1,5 +1,5 @@
-__author__="armin.aha@gmail.com"
-__date__ ="$Mar 15, 2010 8:45:58 PM$"
+__author__ = 'armin.aha@gmail.com'
+__date__ = '$Mar 15, 2010 8:45:58 PM$'
 
 import pylirc
 import time
@@ -36,7 +36,6 @@ def spawn_daemon(path_to_executable, args):
         pid = os.fork()
     except OSError, e:
         raise RuntimeError("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
-        raise Exception, "%s [%d]" % (e.strerror, e.errno)
     if pid != 0:
         # child process is all done
         os._exit(0)
@@ -64,9 +63,11 @@ def spawn_daemon(path_to_executable, args):
         os._exit(255)
 
 def spawn(path_to_executable, args):
-    p = multiprocessing.Process(target=spawn_daemon, args=(path_to_executable, args))
-    p.start()
-    p.join()
+    process = multiprocessing.Process(
+        target=spawn_daemon,
+        args=(path_to_executable, args))
+    process.start()
+    process.join()
 
 
 def show_tv():
@@ -78,7 +79,7 @@ def show_tv():
          'pvr:///dev/video1'])
 
 def handle_code(tuner, osd, code, status):
-    logging.debug("Command: %s, Repeat: %d" % (code["config"], code["repeat"]))
+    logging.debug("Command: %s, Repeat: %d", code["config"], code["repeat"])
     config = code["config"]
     osd_count = 0
     if config.isdigit():
@@ -111,7 +112,7 @@ def set_channel(tuner, osd, channel):
     return 4
 
 def lirc_remote(tuner, osd):
-    blocking = False;
+    blocking = False
 
     status = None
     osd_count = 0
@@ -119,6 +120,7 @@ def lirc_remote(tuner, osd):
     if(pylirc.init("tvtuner", "~/.lircrc", blocking)):
         code = {"config" : ""}
         count = 0
+        # TODO remove 'quit'
         while(code["config"] != "quit"):
             # Delay...
             time.sleep(0.5)
@@ -137,17 +139,17 @@ def lirc_remote(tuner, osd):
                     osd.hide()
 
             # Read next code
-            s = pylirc.nextcode(1)
+            codes = pylirc.nextcode(1)
 
             # Loop as long as there are more on the queue
             # (dont want to wait a second if the user pressed many buttons...)
-            while(s):
+            while(codes):
                 # Print all the configs...
-                for (code) in s:
+                for (code) in codes:
                     (status, osd_count) = handle_code(tuner, osd, code, status)
 
                 # Read next code?
-                s = pylirc.nextcode(1)
+                codes = pylirc.nextcode(1)
 
         # Clean up lirc
         pylirc.exit()
@@ -155,7 +157,8 @@ def lirc_remote(tuner, osd):
 def run():
     device = '/dev/video1'
     tuner = ivtv_tuner.Tuner(device)
-    tuner.init_channels('/home/armin/.tv-viewer/config/stations_europe-west.conf')
+    config_file = '/home/armin/.tv-viewer/config/stations_europe-west.conf'
+    tuner.init_channels(config_file)
     osd = Osd()
     try:
         lirc_remote(tuner, osd)

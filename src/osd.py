@@ -1,13 +1,19 @@
 # coding=utf8
 
-__author__="armin.aha@gmail.com"
-__date__ ="$Sep 1, 2010 7:47:20 PM$"
+__author__ = 'armin.aha@gmail.com'
+__date__  = '$Sep 1, 2010 7:47:20 PM$'
 
 import aosd
 
 class Osd(object):
     """
-    Documentation
+    Wrapper for aosd
+
+    >>>osd = Osd()
+    >>>osd.show_for(u'안녕 world', 1000)
+    >>>for i in range(3):
+    >>>    osd.show_for(str(i+1), 1000)
+    >>>osd.hide()
     """
     def __init__(self):
         self._aosd = aosd.AosdText()
@@ -58,11 +64,3 @@ class Osd(object):
         self._position = 2
         self._x_offset = -30
         self._y_offset = 30
-
-
-if __name__ == "__main__":
-    o = Osd()
-    o.show_for(u'안녕 world', 1000)
-    for i in range(3):
-        o.show_for(str(i+1), 1000)
-    o.hide()

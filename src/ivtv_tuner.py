@@ -59,7 +59,7 @@ class Tuner(object):
         output = check_output(
             command,
             stderr=subprocess.STDOUT)
-        logging.debug('call "%s", output = "%s"', (' '.join(command), output))
+        logging.debug('call "%s", output = "%s"', ' '.join(command), output)
         self.__current_channel = channel
 
     def next_channel(self):
