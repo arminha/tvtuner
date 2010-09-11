@@ -1,9 +1,7 @@
 __author__ = 'armin.aha@gmail.com'
 __date__  = '$Mar 15, 2010 8:54:12 PM$'
 
-import re
 import subprocess
-
 import logging
 
 # TODO audio mode
@@ -87,18 +85,6 @@ class Tuner(object):
             channel = len(self.__channels) - 1
         self.set_channel(channel)
         return channel
-
-    def init_channels(self, filename):
-        config_file = open(filename)
-        self.__channels = []
-        line = config_file.readline()
-        while line:
-            match = re.search('\{([^\}]*)\} ([0-9.]*) 0', line)
-            if match:
-                self.__channels.append((match.group(1), float(match.group(2))))
-            line = config_file.readline()
-        if self.__channels:
-            self.set_channel(0)
 
     def init_stations(self, stations):
         self.__channels = []
