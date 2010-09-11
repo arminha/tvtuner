@@ -99,3 +99,10 @@ class Tuner(object):
             line = config_file.readline()
         if self.__channels:
             self.set_channel(0)
+
+    def init_stations(self, stations):
+        self.__channels = []
+        for station in stations:
+            self.__channels.append((station['name'], station['channel']))
+        if self.__channels:
+            self.set_channel(0)

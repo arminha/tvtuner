@@ -2,11 +2,11 @@ __author__ = 'armin.aha@gmail.com'
 __date__ = '$Mar 15, 2010 8:45:58 PM$'
 
 import pylirc
-import time
+import yaml
 
+import time
 import os
 import multiprocessing
-
 import logging
 
 import ivtv_tuner
@@ -155,10 +155,16 @@ def lirc_remote(tuner, osd):
         pylirc.exit()
 
 def run():
-    device = '/dev/video1'
+    config_file = '/home/armin/.tvtuner/config.yaml'
+    stream = open(config_file)
+    config_data = yaml.load(stream)
+    stream.close()
+
+    device = config_data['device']
+    stations = config_data['stations']
+
     tuner = ivtv_tuner.Tuner(device)
-    config_file = '/home/armin/.tv-viewer/config/stations_europe-west.conf'
-    tuner.init_channels(config_file)
+    tuner.init_stations(stations)
     osd = Osd()
     try:
         lirc_remote(tuner, osd)
