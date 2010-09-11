@@ -1,0 +1,76 @@
+
+device: /dev/video1
+
+stations:
+  - name: SF1
+    channel: '175.60'
+  - name: SF2
+    channel: '210.91'
+  - name: ARD
+    channel: '203.85'
+  - name: ZDF
+    channel: '217.98'
+  - name: SWR BW
+    channel: '253.29'
+  - name: BR
+    channel: '535.23'
+  - name: ORF 1
+    channel: '133.23'
+  - name: ORF 2
+    channel: '575.23'
+  - name: SAT 1
+    channel: '288.60'
+  - name: RTL
+    channel: '182.66'
+  - name: RTL 2
+    channel: '479.23'
+  - name: Super RTL
+    channel: '343.23'
+  - name: PRO 7
+    channel: '519.23'
+  - name: VOX
+    channel: '543.23'
+  - name: kabel eins
+    channel: '126.16'
+  - name: 3sat
+    channel: '399.23'
+  - name: Arte
+    channel: '471.23'
+  - name: Eurosport (d e)
+    channel: '274.48'
+  - name: SSF
+    channel: '267.41'
+  - name: Tele Züri
+    channel: '161.48'
+  - name: Tele M1
+    channel: '140.29'
+  - name: Tele Top
+    channel: '225.04'
+  - name: Star TV
+    channel: '147.35'
+  - name: 3+
+    channel: '260.35'
+  - name: SF info
+    channel: '583.23'
+  - name: CNN Int.
+    channel: '246.23'
+  - name: EuroNews
+    channel: '168.54'
+  - name: MTV
+    channel: '295.66'
+  - name: VIVA
+    channel: '327.23'
+  - name: RSI LA 1
+    channel: '196.79'
+  - name: RSI LA 2
+    channel: '281.54'
+  - name: TSR 1
+    channel: '189.73'
+  - name: TSR 2
+    channel: '239.16'
+  - name: France 2
+    channel: '232.10'
+  - name: RAI UNO
+    channel: '154.41'
+  - name: TV5MONDE EUROPE
+    channel: '551.23'
