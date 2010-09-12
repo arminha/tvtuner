@@ -3,6 +3,7 @@ __date__  = '$Mar 15, 2010 8:54:12 PM$'
 
 import subprocess
 import logging
+import re
 
 # TODO audio mode
 # get audio mode: v4l2-ctl -d 1 -T
@@ -22,21 +23,29 @@ def check_output(*popenargs, **kwargs):
         raise subprocess.CalledProcessError(retcode, cmd)
     return output
 
+_AUDIO_LANG1 = 'lang1'
+_AUDIO_LANG2 = 'lang2'
+_AUDIO_MONO = 'mono'
+_AUDIO_STEREO = 'stereo'
+
 class Tuner(object):
     """
     Tuner supporting ivtv-based tv tuner devices
     """
-    def __init__(self, device):
+    def __init__(self, device, device_short):
         """
         Initialize Tuner.
 
         :param device: The name of the tuner device (usually something like '/dev/video0')
         :type device: string
+        :param device_short: The short name of the device (usually a number like '0')
+        :type device_short: string
         """
         object.__init__(self)
         self.__channels = []
         self.__current_channel = 0
         self.__device = device
+        self.__device_short = device_short
 
     def channels(self):
         for (name, _) in self.__channels:
@@ -92,3 +101,30 @@ class Tuner(object):
             self.__channels.append((station['name'], station['channel']))
         if self.__channels:
             self.set_channel(0)
+
+    def get_audio_mode(self):
+        command = ['v4l2-ctl', '-d', self.__device_short, '-T']
+        output = check_output(
+            command,
+            stderr=subprocess.STDOUT)
+        logging.debug('call "%s", output = "%s"', ' '.join(command), output)
+        match = re.search('Current audio mode\s*:\s*(?P<mode>.*)', output)
+        mode = match.group('mode')
+        return mode
+
+    def get_available_audio_modes(self):
+        command = ['v4l2-ctl', '-d', self.__device_short, '-T']
+        output = check_output(
+            command,
+            stderr=subprocess.STDOUT)
+        logging.debug('call "%s", output = "%s"', ' '.join(command), output)
+        match = re.search('Available subchannels\s*:\s*(?P<modes>.*)', output)
+        modes = match.group('modes')
+        return modes.split()
+
+    def set_audio_mode(self, mode):
+        command = ['v4l2-ctl', '-d', self.__device_short, '-t', mode]
+        output = check_output(
+            command,
+            stderr=subprocess.STDOUT)
+        logging.debug('call "%s", output = "%s"', ' '.join(command), output)

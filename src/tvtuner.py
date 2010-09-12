@@ -161,9 +161,10 @@ def run():
     stream.close()
 
     device = config_data['device']
+    device_short = device[-1:]
     stations = config_data['stations']
 
-    tuner = ivtv_tuner.Tuner(device)
+    tuner = ivtv_tuner.Tuner(device, device_short)
     tuner.init_stations(stations)
     osd = Osd()
     try:
@@ -171,4 +172,5 @@ def run():
     except KeyboardInterrupt:
         osd.hide()
         del osd
+        pylirc.exit()
         logging.debug('Exiting..')
