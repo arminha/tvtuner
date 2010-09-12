@@ -155,7 +155,7 @@ def lirc_remote(tuner, osd):
         pylirc.exit()
 
 def run():
-    config_file = '/home/armin/.tvtuner/config.yaml'
+    config_file = os.path.expanduser('~/.tvtuner/config.yaml')
     stream = open(config_file)
     config_data = yaml.load(stream)
     stream.close()
