@@ -1,0 +1,75 @@
+begin
+  prog = tvtuner
+  button = Zero
+  config = 0
+end
+begin
+  prog = tvtuner
+  button = One
+  config = 1
+end
+begin
+  prog = tvtuner
+  button = Two
+  config = 2
+end
+begin
+  prog = tvtuner
+  button = Three
+  config = 3
+end
+begin
+  prog = tvtuner
+  button = Four
+  config = 4
+end
+begin
+  prog = tvtuner
+  button = Five
+  config = 5
+end
+begin
+  prog = tvtuner
+  button = Six
+  config = 6
+end
+begin
+  prog = tvtuner
+  button = Seven
+  config = 7
+end
+begin
+  prog = tvtuner
+  button = Eight
+  config = 8
+end
+begin
+  prog = tvtuner
+  button = Nine
+  config = 9
+end
+begin
+ prog = tvtuner
+ button = ChanUp
+ config = ChanUp
+end
+begin
+ prog = tvtuner
+ button = ChanDown
+ config = ChanDown
+end
+begin
+  prog = tvtuner
+  button = LiveTV
+  config = ShowTv
+end
+begin
+  prog = tvtuner
+  button = Enter
+  config = Enter
+end
+begin
+  prog = tvtuner
+  button = Hash
+  config = ToggleAudio
+end
