@@ -50,7 +50,7 @@ setup (
     scripts = ['src/tvtuner'],
 
     # Declare your packages' dependencies here, for eg:
-    requires=['pylirc'],
+    requires=['pylirc', 'yaml'],
 
     # Fill in these to make your Egg ready for upload to
     # PyPI
