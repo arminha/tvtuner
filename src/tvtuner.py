@@ -9,17 +9,15 @@ import os
 import multiprocessing
 import logging
 
-import ivtv_tuner
+from ivtv_tuner import Tuner
 from osd import Osd
 
 logging.basicConfig(level=logging.DEBUG)
 
 
 def spawn_daemon(path_to_executable, args):
-    """Spawn a completely detached subprocess (i.e., a daemon).
-
-    E.g. for mark:
-    spawnDaemon("../bin/producenotify.py", "producenotify.py", "xx")
+    """
+    Spawn a completely detached subprocess (i.e., a daemon).
     """
     # fork the first time (to make a non-session-leader child process)
     try:
@@ -78,81 +76,110 @@ def show_tv():
          '--deinterlace-mode=blend',
          'pvr:///dev/video1'])
 
-def handle_code(tuner, osd, code, status):
-    logging.debug("Command: %s, Repeat: %d", code["config"], code["repeat"])
-    config = code["config"]
-    osd_count = 0
-    if config.isdigit():
-        if status is None:
-            channel = int(config)
-            osd.show('%d-' % channel)
-            osd_count = 5
-            return (channel, osd_count)
-        else:
-            channel = status * 10 + int(config)
-            osd_count = set_channel(tuner, osd, channel)
-    elif config == "ChanUp":
-        channel = tuner.next_channel()
-        osd.show(str(channel + 1))
-        osd_count = 4
-    elif config == "ChanDown":
-        channel = tuner.prev_channel()
-        osd.show(str(channel + 1))
-        osd_count = 4
-    elif config == "show-tv":
-        show_tv()
-    elif config == "enter" and not status is None:
-        channel = status
-        osd_count = set_channel(tuner, osd, channel)
-    return (None, osd_count)
+_OSD_SECONDS = 2
+_SINGLE_DIGIT_SECONDS = 2
 
-def set_channel(tuner, osd, channel):
-    tuner.set_channel(channel-1)
-    osd.show(str(channel))
-    return 4
+class Remote(object):
+    def __init__(self, config_data):
+        device = config_data['device']
+        device_short = device[-1:]
+        stations = config_data['stations']
 
-def lirc_remote(tuner, osd):
-    blocking = False
+        self._tuner = Tuner(device, device_short)
+        self._tuner.init_stations(stations)
+        self._osd = Osd()
+        self._sleep_time = 0.2
+        self._osd_time = 0
+        self._first_digit = None
+        self._show_digit_time = 0
 
-    status = None
-    osd_count = 0
+    def set_channel(self, channel):
+        self._tuner.set_channel(channel-1)
+        self.show_osd(str(channel))
+        self._first_digit = None
 
-    if(pylirc.init("tvtuner", "~/.lircrc", blocking)):
-        code = {"config" : ""}
-        count = 0
-        # TODO remove 'quit'
-        while(code["config"] != "quit"):
-            # Delay...
-            time.sleep(0.5)
-            if status:
-                count += 1
+    def show_osd(self, message):
+        self._osd.show(message)
+        self._osd_time = _OSD_SECONDS
+
+    def toggle_audio_mode(self):
+        mode = self._tuner.get_audio_mode()
+        modes = self._tuner.get_available_audio_modes()
+        index = 0
+        try:
+            index = modes.index(mode) + 1
+        except ValueError:
+            pass
+        new_mode = modes[index % len(modes)]
+        self._tuner.set_audio_mode(new_mode)
+        self.show_osd(new_mode)
+
+    def handle_code(self, code):
+        logging.debug("Command: %s, Repeat: %d", code["config"], code["repeat"])
+        config = code["config"]
+        if config.isdigit():
+            digit = int(config)
+            if self._first_digit is None:
+                self.show_osd('%d-' % digit)
+                self._first_digit = digit
+                self._show_digit_time = _SINGLE_DIGIT_SECONDS
             else:
-                count = 0
-            if count > 4:
-                osd_count = set_channel(tuner, osd, status)
-                status = None
-                count = 0
+                channel = self._first_digit * 10 + digit
+                self.set_channel(channel)
+        elif config == "ChanUp":
+            channel = self._tuner.next_channel()
+            self.show_osd(str(channel + 1))
+        elif config == "ChanDown":
+            channel = self._tuner.prev_channel()
+            self.show_osd(str(channel + 1))
+        elif config == "ShowTv":
+            show_tv()
+        elif config == "Enter" and not self._first_digit is None:
+            self.set_channel(self._first_digit)
+        elif config == "ToggleAudio":
+            self.toggle_audio_mode()
 
-            if osd_count > 0:
-                osd_count -= 1
-                if osd_count == 0:
-                    osd.hide()
+    def _lirc_main_loop(self):
+        code = {"config" : ""}
+        while True:
+            # Delay...
+            time.sleep(self._sleep_time)
+
+            # reduce osd time
+            if self._osd_time > 0:
+                self._osd_time -= self._sleep_time
+
+            # set channel if one digit is set
+            if self._first_digit:
+                self._show_digit_time -= self._sleep_time
+                if self._show_digit_time <= 0:
+                    self.set_channel(self._first_digit)
+
+            # hide osd message
+            if self._osd_time <= 0:
+                self._osd.hide()
 
             # Read next code
             codes = pylirc.nextcode(1)
 
             # Loop as long as there are more on the queue
             # (dont want to wait a second if the user pressed many buttons...)
-            while(codes):
-                # Print all the configs...
-                for (code) in codes:
-                    (status, osd_count) = handle_code(tuner, osd, code, status)
+            while codes:
+                for code in codes:
+                    self.handle_code(code)
 
                 # Read next code?
                 codes = pylirc.nextcode(1)
 
-        # Clean up lirc
-        pylirc.exit()
+    def start_main_loop(self):
+        if pylirc.init("tvtuner", "~/.lircrc", False):
+            try:
+                self._lirc_main_loop()
+            except KeyboardInterrupt:
+                self._osd.hide()
+                pylirc.exit()
+        del self._osd
+        logging.debug('Exiting..')
 
 def run():
     config_file = os.path.expanduser('~/.tvtuner/config.yaml')
@@ -160,17 +187,5 @@ def run():
     config_data = yaml.load(stream)
     stream.close()
 
-    device = config_data['device']
-    device_short = device[-1:]
-    stations = config_data['stations']
-
-    tuner = ivtv_tuner.Tuner(device, device_short)
-    tuner.init_stations(stations)
-    osd = Osd()
-    try:
-        lirc_remote(tuner, osd)
-    except KeyboardInterrupt:
-        osd.hide()
-        del osd
-        pylirc.exit()
-        logging.debug('Exiting..')
+    remote = Remote(config_data)
+    remote.start_main_loop()
