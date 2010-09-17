@@ -36,7 +36,7 @@ setup (
     cmdclass = {'build_ext' : build_ext},
 
     name = 'tvtuner',
-    version = '0.1',
+    version = '0.2',
     package_dir = {'': 'src'},
     packages = [''],
     ext_modules = [
