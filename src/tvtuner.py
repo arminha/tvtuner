@@ -82,10 +82,10 @@ _SINGLE_DIGIT_SECONDS = 2
 class Remote(object):
     def __init__(self, config_data):
         device = config_data['device']
-        device_short = device[-1:]
         stations = config_data['stations']
 
-        self._tuner = Tuner(device, device_short)
+        self._device = device
+        self._tuner = Tuner(device)
         self._tuner.init_stations(stations)
         self._osd = Osd()
         self._sleep_time = 0.2

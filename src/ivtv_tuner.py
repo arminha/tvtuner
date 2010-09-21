@@ -5,10 +5,6 @@ import subprocess
 import logging
 import re
 
-# TODO audio mode
-# get audio mode: v4l2-ctl -d 1 -T
-# set audio mode: v4l2-ctl -d 1 -t lang1 ...
-
 # reimplement subprocess.check_output from python 2.7
 def check_output(*popenargs, **kwargs):
     if 'stdout' in kwargs:
@@ -32,7 +28,7 @@ class Tuner(object):
     """
     Tuner supporting ivtv-based tv tuner devices
     """
-    def __init__(self, device, device_short):
+    def __init__(self, device):
         """
         Initialize Tuner.
 
@@ -42,17 +38,16 @@ class Tuner(object):
         :type device_short: string
         """
         object.__init__(self)
-        self.__channels = []
-        self.__current_channel = 0
-        self.__device = device
-        self.__device_short = device_short
+        self._channels = []
+        self._current_channel = 0
+        self._device = device
 
     def channels(self):
-        for (name, _) in self.__channels:
+        for (name, _) in self._channels:
             yield name
 
     def current_channel(self):
-        return self.__current_channel
+        return self._current_channel
 
     def set_channel(self, channel):
         """
@@ -61,13 +56,13 @@ class Tuner(object):
         :param channel: The channel to set
         :type channel: int
         """
-        (_, frequency) = self.__channels[channel]
-        command = ['ivtv-tune', '-d', self.__device, '-f', frequency.__str__()]
+        (_, frequency) = self._channels[channel]
+        command = ['ivtv-tune', '-d', self._device, '-f', frequency.__str__()]
         output = check_output(
             command,
             stderr=subprocess.STDOUT)
         logging.debug('call "%s", output = "%s"', ' '.join(command), output)
-        self.__current_channel = channel
+        self._current_channel = channel
 
     def next_channel(self):
         """
@@ -76,8 +71,8 @@ class Tuner(object):
         :return: The current channel
         :rtype: int
         """
-        channel = self.__current_channel + 1
-        if channel == len(self.__channels):
+        channel = self._current_channel + 1
+        if channel == len(self._channels):
             channel = 0
         self.set_channel(channel)
         return channel
@@ -89,21 +84,21 @@ class Tuner(object):
         :return: The current channel
         :rtype: int
         """
-        channel = self.__current_channel - 1
+        channel = self._current_channel - 1
         if channel == -1:
-            channel = len(self.__channels) - 1
+            channel = len(self._channels) - 1
         self.set_channel(channel)
         return channel
 
     def init_stations(self, stations):
-        self.__channels = []
+        self._channels = []
         for station in stations:
-            self.__channels.append((station['name'], station['channel']))
-        if self.__channels:
+            self._channels.append((station['name'], station['channel']))
+        if self._channels:
             self.set_channel(0)
 
     def get_audio_mode(self):
-        command = ['v4l2-ctl', '-d', self.__device_short, '-T']
+        command = ['v4l2-ctl', '-d', self._device, '-T']
         output = check_output(
             command,
             stderr=subprocess.STDOUT)
@@ -113,7 +108,7 @@ class Tuner(object):
         return mode
 
     def get_available_audio_modes(self):
-        command = ['v4l2-ctl', '-d', self.__device_short, '-T']
+        command = ['v4l2-ctl', '-d', self._device, '-T']
         output = check_output(
             command,
             stderr=subprocess.STDOUT)
@@ -123,7 +118,7 @@ class Tuner(object):
         return modes.split()
 
     def set_audio_mode(self, mode):
-        command = ['v4l2-ctl', '-d', self.__device_short, '-t', mode]
+        command = ['v4l2-ctl', '-d', self._device, '-t', mode]
         output = check_output(
             command,
             stderr=subprocess.STDOUT)
