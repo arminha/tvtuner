@@ -58,6 +58,9 @@ def spawn_daemon(path_to_executable, args):
         os._exit(255)
 
 def spawn(path_to_executable, args):
+    """
+    Spawn executable as a completely detached subprocess (i.e., a daemon).
+    """
     process = multiprocessing.Process(
         target=spawn_daemon,
         args=(path_to_executable, args))
@@ -82,6 +85,9 @@ class Remote(object):
         self._show_digit_time = 0
 
     def show_tv(self):
+        """
+        Start vlc to show tv.
+        """
         spawn('/usr/bin/vlc',
             ['vlc',
             '--quiet',
@@ -89,17 +95,25 @@ class Remote(object):
             '--deinterlace-mode=blend',
             'pvr://%s' % self._device])
 
-
     def set_channel(self, channel):
+        """
+        Set channel.
+        """
         self._tuner.set_channel(channel-1)
         self.show_osd(str(channel))
         self._first_digit = None
 
     def show_osd(self, message):
+        """
+        Show osd message for _OSD_SECONDS seconds.
+        """
         self._osd.show(message)
         self._osd_time = _OSD_SECONDS
 
     def toggle_audio_mode(self):
+        """
+        Toggle between the available audio modes of the current channel.
+        """
         mode = self._tuner.get_audio_mode()
         modes = self._tuner.get_available_audio_modes()
         index = 0
@@ -112,6 +126,9 @@ class Remote(object):
         self.show_osd(new_mode)
 
     def handle_code(self, code):
+        """
+        Handle the lirc commands.
+        """
         logging.debug("Command: %s, Repeat: %d", code["config"], code["repeat"])
         config = code["config"]
         if config.isdigit():
@@ -137,6 +154,9 @@ class Remote(object):
             self.toggle_audio_mode()
 
     def _lirc_main_loop(self):
+        """
+        Pylirc main loop.
+        """
         code = {"config" : ""}
         while True:
             # Delay...
@@ -169,6 +189,9 @@ class Remote(object):
                 codes = pylirc.nextcode(1)
 
     def start_main_loop(self):
+        """
+        Read lirc config file and start main pylirc main loop.
+        """
         if pylirc.init("tvtuner", "~/.lircrc", False):
             try:
                 self._lirc_main_loop()

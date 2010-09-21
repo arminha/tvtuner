@@ -5,12 +5,14 @@ import subprocess
 import logging
 import re
 
-# reimplement subprocess.check_output from python 2.7
 def check_output(*popenargs, **kwargs):
+    """
+    Reimplement subprocess.check_output from python 2.7
+    """
     if 'stdout' in kwargs:
         raise ValueError('stdout argument not allowed, it will be overridden.')
     process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
-    output, unused_err = process.communicate()
+    output, _ = process.communicate()
     retcode = process.poll()
     if retcode:
         cmd = kwargs.get("args")
@@ -43,10 +45,22 @@ class Tuner(object):
         self._device = device
 
     def channels(self):
+        """
+        Return the names of the available channels.
+
+        :return: Channel list
+        :rtype: [string]
+        """
         for (name, _) in self._channels:
             yield name
 
     def current_channel(self):
+        """
+        Return the current channel.
+
+        :return: The current channel
+        :rtype: int
+        """
         return self._current_channel
 
     def set_channel(self, channel):
