@@ -186,7 +186,9 @@ def run():
 
     # initialize logging
     if config_data.has_key('logfile'):
-        logging.basicConfig(filename=config_data['logfile'], level=logging.DEBUG)
+        logging.basicConfig(
+            filename=config_data['logfile'],
+            level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.DEBUG)
 
