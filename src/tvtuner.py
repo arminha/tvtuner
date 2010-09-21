@@ -67,15 +67,6 @@ def spawn(path_to_executable, args):
     process.start()
     process.join()
 
-
-def show_tv():
-    spawn('/usr/bin/vlc',
-        ['vlc',
-         '--quiet',
-         '--video-filter=deinterlace',
-         '--deinterlace-mode=blend',
-         'pvr:///dev/video1'])
-
 _OSD_SECONDS = 2
 _SINGLE_DIGIT_SECONDS = 2
 
@@ -92,6 +83,15 @@ class Remote(object):
         self._osd_time = 0
         self._first_digit = None
         self._show_digit_time = 0
+
+    def show_tv(self):
+        spawn('/usr/bin/vlc',
+            ['vlc',
+            '--quiet',
+            '--video-filter=deinterlace',
+            '--deinterlace-mode=blend',
+            'pvr://%s' % self._device])
+
 
     def set_channel(self, channel):
         self._tuner.set_channel(channel-1)
@@ -133,7 +133,7 @@ class Remote(object):
             channel = self._tuner.prev_channel()
             self.show_osd(str(channel + 1))
         elif config == "ShowTv":
-            show_tv()
+            self.show_tv()
         elif config == "Enter" and not self._first_digit is None:
             self.set_channel(self._first_digit)
         elif config == "ToggleAudio":
