@@ -12,9 +12,6 @@ import logging
 from ivtv_tuner import Tuner
 from osd import Osd
 
-logging.basicConfig(level=logging.DEBUG)
-
-
 def spawn_daemon(path_to_executable, args):
     """
     Spawn a completely detached subprocess (i.e., a daemon).
@@ -186,6 +183,12 @@ def run():
     stream = open(config_file)
     config_data = yaml.load(stream)
     stream.close()
+
+    # initialize logging
+    if config_data.has_key('logfile'):
+        logging.basicConfig(filename=config_data['logfile'], level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.DEBUG)
 
     remote = Remote(config_data)
     remote.start_main_loop()

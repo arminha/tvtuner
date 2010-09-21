@@ -1,6 +1,8 @@
 
 device: /dev/video1
 
+logfile: /tmp/tvtuner.log
+
 stations:
   - name: SF1
     channel: '175.60'
