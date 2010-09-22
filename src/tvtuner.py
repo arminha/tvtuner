@@ -80,7 +80,7 @@ class Remote(object):
         self._tuner.init_stations(stations)
         self._osd = Osd()
         self._sleep_time = 0.2
-        self._osd_time = 0
+        self._osd_time = None
         self._first_digit = None
         self._show_digit_time = 0
 
@@ -163,7 +163,7 @@ class Remote(object):
             time.sleep(self._sleep_time)
 
             # reduce osd time
-            if self._osd_time > 0:
+            if self._osd_time and self._osd_time > 0:
                 self._osd_time -= self._sleep_time
 
             # set channel if one digit is set
@@ -173,8 +173,9 @@ class Remote(object):
                     self.set_channel(self._first_digit)
 
             # hide osd message
-            if self._osd_time <= 0:
+            if self._osd_time and self._osd_time <= 0:
                 self._osd.hide()
+                self._osd_time = None
 
             # Read next code
             codes = pylirc.nextcode(1)
