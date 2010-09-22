@@ -19,8 +19,8 @@ def spawn_daemon(path_to_executable, args):
     # fork the first time (to make a non-session-leader child process)
     try:
         pid = os.fork()
-    except OSError, e:
-        raise RuntimeError("1st fork failed: %s [%d]" % (e.strerror, e.errno))
+    except OSError, ex:
+        raise RuntimeError("1st fork failed: %s [%d]" % (ex.strerror, ex.errno))
     if pid != 0:
         # parent (calling) process is all done
         return
@@ -29,8 +29,8 @@ def spawn_daemon(path_to_executable, args):
     os.setsid()
     try:
         pid = os.fork()
-    except OSError, e:
-        raise RuntimeError("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
+    except OSError, ex:
+        raise RuntimeError("2nd fork failed: %s [%d]" % (ex.strerror, ex.errno))
     if pid != 0:
         # child process is all done
         os._exit(0)
@@ -53,7 +53,7 @@ def spawn_daemon(path_to_executable, args):
     # and finally let's execute the executable for the daemon!
     try:
         os.execv(path_to_executable, args)
-    except Exception, e:
+    except:
         # oops, we're cut off from the world, let's just give up
         os._exit(255)
 
@@ -215,5 +215,8 @@ def run():
     else:
         logging.basicConfig(level=logging.DEBUG)
 
-    remote = Remote(config_data)
-    remote.start_main_loop()
+    try:
+        remote = Remote(config_data)
+        remote.start_main_loop()
+    except:
+        logging.exception("Unexpected Error:")
