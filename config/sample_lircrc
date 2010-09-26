@@ -73,3 +73,8 @@ begin
   button = Hash
   config = ToggleAudio
 end
+begin
+  prog = tvtuner
+  button = Power
+  config = Shutdown
+end

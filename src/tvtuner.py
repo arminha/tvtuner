@@ -8,6 +8,7 @@ import time
 import os
 import multiprocessing
 import logging
+import subprocess
 
 from ivtv_tuner import Tuner
 from osd import Osd
@@ -67,6 +68,33 @@ def spawn(path_to_executable, args):
     process.start()
     process.join()
 
+def is_running(process_name):
+    with os.popen("ps x") as lines:
+        for line in lines:
+            fields = line.split()
+            process = fields[4]
+            if process_name == process:
+                return True
+        return False
+
+def shutdown():
+    """
+    Close the Gnome session and shutdown the computer using dbus.
+    Obviously only works when Gnome is running.
+    Was only tested on Gnome 2.30 on Ubuntu 10.4.
+
+    > dbus-send --print-reply --dest=org.gnome.SessionManager
+      /org/gnome/SessionManager org.gnome.SessionManager.RequestShutdown
+    """
+    logging.info('shutdown computer')
+    subprocess.check_call(
+        ['dbus-send',
+         '--print-reply',
+         '--dest=org.gnome.SessionManager',
+         '/org/gnome/SessionManager',
+         'org.gnome.SessionManager.RequestShutdown'])
+    exit(0)
+
 _OSD_SECONDS = 2
 _SINGLE_DIGIT_SECONDS = 2
 
@@ -83,6 +111,7 @@ class Remote(object):
         self._osd_time = None
         self._first_digit = None
         self._show_digit_time = 0
+        self._show_shutdown_message = False
 
     def show_tv(self):
         """
@@ -152,6 +181,14 @@ class Remote(object):
             self.set_channel(self._first_digit)
         elif config == "ToggleAudio":
             self.toggle_audio_mode()
+        if config == 'Shutdown' and not is_running('vlc'):
+            if self._show_shutdown_message:
+                shutdown()
+            else:
+                self.show_osd('Shutdown?')
+                self._show_shutdown_message = True
+        else:
+            self._show_shutdown_message = False
 
     def _lirc_main_loop(self):
         """
