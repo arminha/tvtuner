@@ -70,7 +70,7 @@ class Tuner(object):
         :param channel: The channel to set
         :type channel: int
         """
-        (_, frequency) = self._channels[channel]
+        (_, frequency) = self._channels[channel % len(self._channels)]
         command = ['ivtv-tune', '-d', self._device, '-f', frequency.__str__()]
         output = check_output(
             command,
