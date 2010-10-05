@@ -10,7 +10,7 @@ import multiprocessing
 import logging
 import subprocess
 
-from ivtv_tuner import Tuner
+from ivtv_tuner import Tuner, scan_for_devices
 from osd import Osd
 
 def spawn_daemon(path_to_executable, args):
@@ -102,6 +102,8 @@ class Remote(object):
     def __init__(self, config_data):
         device = config_data['device']
         stations = config_data['stations']
+        if device.lower() == 'auto':
+            device = scan_for_devices()[0]
 
         self._device = device
         self._tuner = Tuner(device)
