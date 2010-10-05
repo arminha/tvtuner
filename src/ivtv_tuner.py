@@ -4,6 +4,8 @@ __date__  = '$Mar 15, 2010 8:54:12 PM$'
 import subprocess
 import logging
 import re
+import os
+import os.path
 
 def check_output(*popenargs, **kwargs):
     """
@@ -25,6 +27,19 @@ _AUDIO_LANG1 = 'lang1'
 _AUDIO_LANG2 = 'lang2'
 _AUDIO_MONO = 'mono'
 _AUDIO_STEREO = 'stereo'
+
+def scan_for_devices():
+    devices = []
+    for d in range(0,10):
+        dev = '/dev/video%d' % d
+        if os.path.exists(dev):
+            return_code = subprocess.call(
+                ['v4l2-ctl', '-d', dev, '-T'],
+                stdout=open(os.devnull),
+                stderr=subprocess.STDOUT)
+            if return_code == 0:
+                devices.append(dev)
+    return devices
 
 class Tuner(object):
     """
