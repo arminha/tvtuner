@@ -1,5 +1,5 @@
 
-device: /dev/video1
+device: auto
 
 logfile: /tmp/tvtuner.log
 
