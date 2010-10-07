@@ -5,7 +5,7 @@ from distutils.core import setup
 
 setup (
     name = 'tvtuner',
-    version = '0.2.4',
+    version = '0.3.0',
     package_dir = {'': 'src'},
     packages = [''],
     scripts = ['src/tvtuner'],
@@ -18,7 +18,7 @@ setup (
     author = 'Armin Häberling',
     author_email = 'armin.aha@gmail.com',
 
-    description = 'Just another Python package for the cheese shop',
+    description = 'TV tuner for ivtv cards.',
     license = '',
     long_description= 'Long description of the package',
 )
