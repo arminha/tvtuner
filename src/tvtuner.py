@@ -102,12 +102,20 @@ class Remote(object):
     def __init__(self, config_data):
         device = config_data['device']
         stations = config_data['stations']
+        devices = []
         if device.lower() == 'auto':
-            device = scan_for_devices()[0]
+            devices = scan_for_devices()
+        else:
+            devices = [device]
 
-        self._device = device
-        self._tuner = Tuner(device)
-        self._tuner.init_stations(stations)
+        self._devices = devices
+        self._device = devices[0]
+        self._tuners = []
+        for dev in self._devices:
+            tuner = Tuner(dev)
+            tuner.init_stations(stations)
+            self._tuners.append(tuner)
+        self._tuner = self._tuners[0]
         self._osd = Osd()
         self._sleep_time = 0.2
         self._osd_time = None
@@ -156,6 +164,11 @@ class Remote(object):
         self._tuner.set_audio_mode(new_mode)
         self.show_osd(new_mode)
 
+    def switch_device(self):
+        ind = (self._devices.index(self._device) + 1) % len(self._devices)
+        self._device = self._devices[ind]
+        self._tuner = self._tuners[ind]
+
     def handle_code(self, code):
         """
         Handle the lirc commands.
@@ -191,6 +204,8 @@ class Remote(object):
                 self._show_shutdown_message = True
         else:
             self._show_shutdown_message = False
+        if config == "SwitchDevice":
+            self.switch_device()
 
     def _lirc_main_loop(self):
         """
