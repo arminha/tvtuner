@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf8
 
 from distutils.core import setup
 
@@ -12,7 +11,7 @@ setup (
 
     requires=['pylirc', 'yaml', 'aosd'],
 
-    author = 'Armin Häberling',
+    author = u'Armin H\u00e4berling',
     author_email = 'armin.aha@gmail.com',
 
     description = 'Script to control IVTV based tv cards with an IR remote.',
