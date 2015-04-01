@@ -8,5 +8,4 @@ Dependencies
 
 - `pyLirc <http://www.lirc.org>`__
 - `PyYAML <http://pyyaml.org/>`__
-- `python-aosd <http://code.google.com/p/python-aosd/>`__
-
+- `python-aosd <https://github.com/arminha/python-aosd>`__
